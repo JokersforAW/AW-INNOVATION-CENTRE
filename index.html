@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FOLIO — Creative Portfolio CMS</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0f;
+    --paper: #f5f2ec;
+    --cream: #ede9e0;
+    --gold: #c9a84c;
+    --gold-lt: #e8d5a3;
+    --rust: #c44b2b;
+    --slate: #3a3d4a;
+    --mist: #8c8fa0;
+    --green: #2d6a4f;
+    --blue: #1a3a5c;
+    --r: 8px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Mono', monospace;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── NAV ─── */
+  #nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem; height: 58px;
+    background: var(--ink);
+    border-bottom: 1px solid #222;
+  }
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1.1rem;
+    letter-spacing: .12em; color: var(--gold);
+    cursor: pointer;
+  }
+  .nav-tabs { display: flex; gap: .25rem; }
+  .nav-tab {
+    padding: .35rem .9rem; border-radius: 4px;
+    font-family: 'DM Mono', monospace; font-size: .7rem;
+    letter-spacing: .08em; text-transform: uppercase;
+    cursor: pointer; border: none; background: transparent;
+    color: var(--mist); transition: all .2s;
+  }
+  .nav-tab:hover { color: #fff; }
+  .nav-tab.active { background: var(--gold); color: var(--ink); font-weight: 500; }
+  .nav-right { display: flex; gap: .75rem; align-items: center; }
+  .btn-cms {
+    padding: .35rem 1rem; border-radius: 4px;
+    font-family: 'DM Mono', monospace; font-size: .7rem;
+    letter-spacing: .08em; text-transform: uppercase;
+    cursor: pointer; border: 1.5px solid var(--gold);
+    background: transparent; color: var(--gold); transition: all .2s;
+  }
+  .btn-cms:hover { background: var(--gold); color: var(--ink); }
+  .btn-cms.active-mode { background: var(--rust); border-color: var(--rust); color: #fff; }
+
+  /* ─── VIEWS ─── */
+  .view { display: none; padding-top: 58px; min-height: 100vh; }
+  .view.active { display: block; }
+
+  /* ─── PUBLIC HERO ─── */
+  #hero {
+    background: var(--ink);
+    padding: 5rem 2rem 4rem;
+    text-align: center;
+    position: relative; overflow: hidden;
+  }
+  #hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 110%, #c9a84c18 0%, transparent 70%),
+                radial-gradient(ellipse 50% 40% at 20% 0%, #c44b2b10 0%, transparent 60%);
+  }
+  .hero-label {
+    font-size: .65rem; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 1rem; position: relative;
+  }
+  .hero-title {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: clamp(2.5rem, 6vw, 5rem); line-height: 1.05;
+    color: #fff; position: relative; margin-bottom: .75rem;
+  }
+  .hero-title em { font-family: 'Instrument Serif', serif; font-style: italic; color: var(--gold); }
+  .hero-sub {
+    font-size: .8rem; color: var(--mist); max-width: 520px;
+    margin: 0 auto 2.5rem; line-height: 1.7; position: relative;
+  }
+  .hero-cats {
+    display: flex; flex-wrap: wrap; gap: .5rem;
+    justify-content: center; position: relative;
+  }
+  .hero-cat {
+    padding: .45rem 1.1rem; border-radius: 50px;
+    border: 1px solid #333; font-size: .68rem;
+    letter-spacing: .08em; color: var(--mist);
+    cursor: pointer; transition: all .25s; background: #111;
+  }
+  .hero-cat:hover, .hero-cat.active {
+    border-color: var(--gold); color: var(--gold); background: #1a160a;
+  }
+
+  /* ─── GRID SECTION ─── */
+  #public-grid { padding: 3rem 2rem 4rem; max-width: 1200px; margin: 0 auto; }
+  .section-header {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 2rem;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.3rem;
+  }
+  .section-count { font-size: .7rem; color: var(--mist); }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .product-card {
+    background: #fff; border-radius: var(--r);
+    border: 1px solid #e8e4da;
+    overflow: hidden; cursor: pointer;
+    transition: transform .2s, box-shadow .2s;
+    animation: fadeUp .4s ease both;
+  }
+  .product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0,0,0,.1);
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-thumb {
+    aspect-ratio: 16/9;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.5rem; position: relative; overflow: hidden;
+  }
+  .card-thumb-label {
+    position: absolute; bottom: .5rem; right: .5rem;
+    font-size: .6rem; letter-spacing: .1em; text-transform: uppercase;
+    background: rgba(0,0,0,.5); color: #fff;
+    padding: .2rem .5rem; border-radius: 3px; backdrop-filter: blur(4px);
+  }
+  .card-body { padding: 1rem 1.1rem 1.1rem; }
+  .card-cat {
+    font-size: .6rem; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: .3rem;
+  }
+  .card-title {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: .95rem;
+    margin-bottom: .4rem; line-height: 1.3;
+  }
+  .card-desc { font-size: .72rem; color: var(--mist); line-height: 1.6; margin-bottom: .9rem; }
+  .card-footer {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-price {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: .95rem;
+  }
+  .card-price.free { color: var(--green); }
+  .card-btn {
+    padding: .35rem .9rem; border-radius: 4px;
+    font-size: .65rem; letter-spacing: .08em; text-transform: uppercase;
+    background: var(--ink); color: #fff; border: none; cursor: pointer;
+    transition: background .2s;
+  }
+  .card-btn:hover { background: var(--gold); color: var(--ink); }
+  .card-tags { display: flex; gap: .3rem; flex-wrap: wrap; margin-bottom: .7rem; }
+  .tag {
+    font-size: .58rem; padding: .15rem .45rem; border-radius: 3px;
+    background: var(--cream); color: var(--slate); letter-spacing: .06em;
+  }
+
+  .no-items {
+    text-align: center; padding: 4rem 2rem; color: var(--mist); grid-column: 1/-1;
+    font-size: .8rem;
+  }
+
+  /* ─── CMS VIEW ─── */
+  #cms-view { background: var(--cream); }
+  .cms-layout {
+    display: grid; grid-template-columns: 240px 1fr;
+    min-height: calc(100vh - 58px);
+  }
+  .cms-sidebar {
+    background: var(--ink); padding: 1.5rem 1rem;
+    display: flex; flex-direction: column; gap: .25rem;
+  }
+  .cms-sidebar-title {
+    font-size: .6rem; letter-spacing: .15em; text-transform: uppercase;
+    color: var(--mist); padding: .5rem .75rem; margin-top: .5rem;
+  }
+  .cms-nav-item {
+    display: flex; align-items: center; gap: .65rem;
+    padding: .6rem .75rem; border-radius: 5px;
+    cursor: pointer; transition: background .2s; color: #ccc;
+    font-size: .75rem; border: none; background: transparent; text-align: left; width: 100%;
+  }
+  .cms-nav-item:hover { background: #1a1a22; color: #fff; }
+  .cms-nav-item.active { background: var(--gold); color: var(--ink); }
+  .cms-nav-item .icon { font-size: 1rem; width: 1.2rem; }
+
+  .cms-main { padding: 2rem; overflow-y: auto; }
+  .cms-page { display: none; }
+  .cms-page.active { display: block; }
+
+  .cms-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 2rem;
+  }
+  .cms-page-title {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.6rem;
+  }
+  .btn-add {
+    display: flex; align-items: center; gap: .4rem;
+    padding: .5rem 1.1rem; border-radius: 5px;
+    background: var(--gold); color: var(--ink);
+    border: none; cursor: pointer; font-family: 'DM Mono', monospace;
+    font-size: .72rem; font-weight: 500; letter-spacing: .05em;
+    transition: background .2s;
+  }
+  .btn-add:hover { background: #b8932d; }
+
+  /* ANALYTICS CARDS */
+  .stat-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem; margin-bottom: 2rem;
+  }
+  .stat-card {
+    background: #fff; border-radius: var(--r);
+    padding: 1.25rem; border: 1px solid #e0dbd0;
+  }
+  .stat-val {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 2rem;
+    line-height: 1;
+  }
+  .stat-label { font-size: .65rem; color: var(--mist); margin-top: .3rem; letter-spacing: .08em; }
+  .stat-delta { font-size: .65rem; margin-top: .5rem; }
+  .stat-delta.up { color: var(--green); }
+  .stat-delta.down { color: var(--rust); }
+
+  .chart-row { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-bottom: 2rem; }
+  .chart-box {
+    background: #fff; border-radius: var(--r);
+    padding: 1.25rem; border: 1px solid #e0dbd0;
+  }
+  .chart-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: .85rem; margin-bottom: 1rem; }
+
+  .bar-chart { display: flex; align-items: flex-end; gap: .5rem; height: 100px; }
+  .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: .3rem; }
+  .bar {
+    width: 100%; border-radius: 3px 3px 0 0;
+    background: var(--gold); transition: height .5s ease;
+  }
+  .bar-lbl { font-size: .55rem; color: var(--mist); }
+
+  .donut-wrap { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+  .donut { width: 80px; height: 80px; }
+  .legend { width: 100%; }
+  .legend-item {
+    display: flex; align-items: center; gap: .4rem;
+    font-size: .65rem; margin-bottom: .3rem;
+  }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* PRODUCT TABLE */
+  .cms-table-wrap {
+    background: #fff; border-radius: var(--r);
+    border: 1px solid #e0dbd0; overflow: hidden;
+  }
+  .cms-table { width: 100%; border-collapse: collapse; }
+  .cms-table th {
+    text-align: left; padding: .75rem 1rem;
+    font-size: .6rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--mist); background: #faf8f4;
+    border-bottom: 1px solid #e8e4da;
+  }
+  .cms-table td {
+    padding: .75rem 1rem; border-bottom: 1px solid #f0ece4;
+    font-size: .75rem; vertical-align: middle;
+  }
+  .cms-table tr:last-child td { border-bottom: none; }
+  .cms-table tr:hover td { background: #faf8f4; }
+  .tbl-title { font-weight: 500; }
+  .tbl-cat {
+    font-size: .6rem; padding: .2rem .5rem; border-radius: 3px;
+    background: var(--cream); color: var(--slate);
+  }
+  .tbl-status {
+    font-size: .6rem; padding: .2rem .5rem; border-radius: 3px;
+  }
+  .tbl-status.published { background: #d4edda; color: #155724; }
+  .tbl-status.draft { background: #fff3cd; color: #856404; }
+  .tbl-actions { display: flex; gap: .4rem; }
+  .tbl-btn {
+    padding: .25rem .6rem; border-radius: 3px; font-size: .62rem;
+    border: 1px solid #ddd; background: transparent; cursor: pointer;
+    transition: all .15s;
+  }
+  .tbl-btn:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .tbl-btn.danger:hover { background: var(--rust); border-color: var(--rust); }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.5);
+    z-index: 200; display: none; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #fff; border-radius: 10px;
+    width: 90%; max-width: 600px; max-height: 90vh;
+    overflow-y: auto;
+    animation: slideIn .25s ease;
+  }
+  @keyframes slideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 1.5rem; border-bottom: 1px solid #eee;
+  }
+  .modal-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.1rem; }
+  .modal-close {
+    background: none; border: none; font-size: 1.4rem;
+    cursor: pointer; color: var(--mist); line-height: 1;
+  }
+  .modal-body { padding: 1.5rem; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-group { display: flex; flex-direction: column; gap: .4rem; }
+  .form-group.full { grid-column: 1/-1; }
+  label { font-size: .65rem; letter-spacing: .08em; text-transform: uppercase; color: var(--mist); }
+  input, select, textarea {
+    padding: .55rem .75rem; border: 1.5px solid #e0dbd0; border-radius: 5px;
+    font-family: 'DM Mono', monospace; font-size: .78rem; background: #faf8f4;
+    transition: border-color .15s; outline: none; color: var(--ink);
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--gold); background: #fff; }
+  textarea { resize: vertical; min-height: 80px; }
+  .emoji-picker {
+    display: flex; flex-wrap: wrap; gap: .3rem; padding: .5rem 0;
+  }
+  .emoji-opt {
+    font-size: 1.4rem; cursor: pointer; padding: .2rem;
+    border-radius: 4px; transition: background .15s;
+  }
+  .emoji-opt:hover, .emoji-opt.selected { background: var(--cream); }
+  .modal-footer {
+    display: flex; gap: .75rem; justify-content: flex-end;
+    padding: 1rem 1.5rem; border-top: 1px solid #eee;
+  }
+  .btn-cancel {
+    padding: .5rem 1.1rem; border-radius: 5px; font-size: .72rem;
+    border: 1.5px solid #ddd; background: transparent; cursor: pointer;
+    font-family: 'DM Mono', monospace;
+  }
+  .btn-save {
+    padding: .5rem 1.1rem; border-radius: 5px; font-size: .72rem;
+    background: var(--ink); color: #fff; border: none; cursor: pointer;
+    font-family: 'DM Mono', monospace; transition: background .2s;
+  }
+  .btn-save:hover { background: var(--gold); color: var(--ink); }
+
+  /* SETTINGS */
+  .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .settings-card {
+    background: #fff; border-radius: var(--r);
+    padding: 1.5rem; border: 1px solid #e0dbd0;
+  }
+  .settings-card-title {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: .9rem;
+    margin-bottom: 1rem;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 2rem; right: 2rem; z-index: 300;
+    background: var(--ink); color: #fff; padding: .75rem 1.25rem;
+    border-radius: 6px; font-size: .75rem;
+    display: none; animation: toastIn .25s ease;
+    border-left: 3px solid var(--gold);
+  }
+  .toast.show { display: block; }
+  @keyframes toastIn {
+    from { transform: translateX(20px); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
+  }
+
+  /* PRODUCT DETAIL MODAL */
+  .detail-thumb {
+    aspect-ratio: 16/9; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 4rem; margin-bottom: 1.25rem;
+  }
+  .detail-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem; margin-bottom: .4rem; }
+  .detail-cat { color: var(--gold); font-size: .7rem; letter-spacing: .1em; margin-bottom: .8rem; }
+  .detail-desc { font-size: .8rem; color: var(--slate); line-height: 1.7; margin-bottom: 1rem; }
+  .detail-footer { display: flex; align-items: center; justify-content: space-between; }
+  .detail-price { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.5rem; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .cms-layout { grid-template-columns: 1fr; }
+    .cms-sidebar { flex-direction: row; flex-wrap: wrap; padding: .75rem; }
+    .chart-row { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    .settings-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-logo" onclick="showView('public')">✦ FOLIO</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showView('public')">Portfolio</button>
+    <button class="nav-tab" onclick="showView('cms')">Dashboard</button>
+  </div>
+  <div class="nav-right">
+    <button class="btn-cms" id="cms-toggle" onclick="showView('cms')">⚙ Manage</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════ PUBLIC VIEW ═══════════════════════════════════ -->
+<div class="view active" id="public-view">
+  <!-- Hero -->
+  <div id="hero">
+    <div class="hero-label">Creative Digital Products</div>
+    <h1 class="hero-title">Work That <em>Speaks</em><br>For Itself</h1>
+    <p class="hero-sub">Explore a curated collection of premium digital assets — from data dashboards to game templates, AI visuals to poster designs.</p>
+    <div class="hero-cats">
+      <button class="hero-cat active" onclick="filterPublic('all', this)">All Products</button>
+      <button class="hero-cat" onclick="filterPublic('analysis', this)">📊 Analysis</button>
+      <button class="hero-cat" onclick="filterPublic('ai-visuals', this)">🎨 AI Visuals</button>
+      <button class="hero-cat" onclick="filterPublic('slides', this)">🖥️ Slides</button>
+      <button class="hero-cat" onclick="filterPublic('posters', this)">🖼️ Posters</button>
+      <button class="hero-cat" onclick="filterPublic('digital', this)">📦 Digital</button>
+      <button class="hero-cat" onclick="filterPublic('games', this)">🎮 Games</button>
+    </div>
+  </div>
+
+  <!-- Grid -->
+  <div id="public-grid">
+    <div class="section-header">
+      <span class="section-title" id="grid-label">All Products</span>
+      <span class="section-count" id="grid-count">0 items</span>
+    </div>
+    <div class="product-grid" id="public-product-grid"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ CMS VIEW ═══════════════════════════════════ -->
+<div class="view" id="cms-view">
+  <div class="cms-layout">
+    <!-- Sidebar -->
+    <aside class="cms-sidebar">
+      <div class="cms-sidebar-title">Overview</div>
+      <button class="cms-nav-item active" onclick="showCmsPage('dashboard', this)">
+        <span class="icon">📊</span> Dashboard
+      </button>
+      <div class="cms-sidebar-title">Categories</div>
+      <button class="cms-nav-item" onclick="showCmsPage('manage', this, 'all')">
+        <span class="icon">📋</span> All Products
+      </button>
+      <button class="cms-nav-item" onclick="showCmsPage('manage', this, 'analysis')">
+        <span class="icon">📈</span> Analysis
+      </button>
+      <button class="cms-nav-item" onclick="showCmsPage('manage', this, 'ai-visuals')">
+        <span class="icon">🎨</span> AI Visuals
+      </button>
+      <button class="cms-nav-item" onclick="showCmsPage('manage', this, 'slides')">
+        <span class="icon">🖥️</span> Slides
+      </button>
+      <button class="cms-nav-item" onclick="showCmsPage('manage', this, 'posters')">
+        <span class="icon">🖼️</span> Posters
+      </button>
+      <button class="cms-nav-item" onclick="showCmsPage('manage', this, 'digital')">
+        <span class="icon">📦</span> Digital Products
+      </button>
+      <button class="cms-nav-item" onclick="showCmsPage('manage', this, 'games')">
+        <span class="icon">🎮</span> Games
+      </button>
+      <div class="cms-sidebar-title">Site</div>
+      <button class="cms-nav-item" onclick="showCmsPage('settings', this)">
+        <span class="icon">⚙️</span> Settings
+      </button>
+    </aside>
+
+    <!-- Main -->
+    <main class="cms-main">
+
+      <!-- Dashboard -->
+      <div class="cms-page active" id="page-dashboard">
+        <div class="cms-header">
+          <h1 class="cms-page-title">Dashboard</h1>
+          <button class="btn-add" onclick="openAddModal()">＋ Add Product</button>
+        </div>
+        <div class="stat-grid" id="stat-grid"></div>
+        <div class="chart-row">
+          <div class="chart-box">
+            <div class="chart-title">Products by Category</div>
+            <div class="bar-chart" id="bar-chart"></div>
+          </div>
+          <div class="chart-box">
+            <div class="chart-title">Status Split</div>
+            <div class="donut-wrap">
+              <svg class="donut" viewBox="0 0 36 36" id="donut-svg"></svg>
+              <div class="legend" id="donut-legend"></div>
+            </div>
+          </div>
+        </div>
+        <div class="cms-table-wrap">
+          <table class="cms-table">
+            <thead>
+              <tr>
+                <th>Product</th><th>Category</th><th>Price</th>
+                <th>Status</th><th>Date</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="recent-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Manage -->
+      <div class="cms-page" id="page-manage">
+        <div class="cms-header">
+          <h1 class="cms-page-title" id="manage-title">All Products</h1>
+          <button class="btn-add" onclick="openAddModal()">＋ Add Product</button>
+        </div>
+        <div class="cms-table-wrap">
+          <table class="cms-table">
+            <thead>
+              <tr>
+                <th></th><th>Product</th><th>Category</th><th>Price</th>
+                <th>Status</th><th>Tags</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="manage-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div class="cms-page" id="page-settings">
+        <div class="cms-header">
+          <h1 class="cms-page-title">Site Settings</h1>
+        </div>
+        <div class="settings-grid">
+          <div class="settings-card">
+            <div class="settings-card-title">Portfolio Identity</div>
+            <div class="form-group" style="margin-bottom:.75rem">
+              <label>Portfolio Name</label>
+              <input type="text" id="set-name" value="FOLIO" oninput="saveSettings()">
+            </div>
+            <div class="form-group" style="margin-bottom:.75rem">
+              <label>Tagline</label>
+              <input type="text" id="set-tagline" value="Work That Speaks For Itself" oninput="saveSettings()">
+            </div>
+            <div class="form-group">
+              <label>Bio / About</label>
+              <textarea id="set-bio" rows="3" oninput="saveSettings()">Creative digital products for modern professionals.</textarea>
+            </div>
+          </div>
+          <div class="settings-card">
+            <div class="settings-card-title">Contact & Links</div>
+            <div class="form-group" style="margin-bottom:.75rem">
+              <label>Email</label>
+              <input type="email" id="set-email" value="hello@myportfolio.com" oninput="saveSettings()">
+            </div>
+            <div class="form-group" style="margin-bottom:.75rem">
+              <label>Twitter / X</label>
+              <input type="text" id="set-twitter" value="@myhandle" oninput="saveSettings()">
+            </div>
+            <div class="form-group">
+              <label>Gumroad / Shop URL</label>
+              <input type="text" id="set-shop" value="https://gumroad.com/myshop" oninput="saveSettings()">
+            </div>
+          </div>
+          <div class="settings-card">
+            <div class="settings-card-title">Display Preferences</div>
+            <div class="form-group" style="margin-bottom:.75rem">
+              <label>Default View</label>
+              <select id="set-view">
+                <option>Grid (3 columns)</option>
+                <option>Grid (2 columns)</option>
+                <option>List</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Show Prices</label>
+              <select id="set-prices">
+                <option>Yes — show all prices</option>
+                <option>Only on hover</option>
+                <option>Hide prices</option>
+              </select>
+            </div>
+          </div>
+          <div class="settings-card">
+            <div class="settings-card-title">Category Labels</div>
+            <div style="font-size:.72rem; color:var(--mist); line-height:1.7">
+              Manage which categories appear in the public navigation. All 6 categories are active by default.
+            </div>
+            <div style="margin-top:1rem; display:flex; flex-direction:column; gap:.5rem" id="cat-toggles"></div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ADD / EDIT MODAL -->
+<div class="modal-overlay" id="product-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Add Product</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Product Name</label>
+          <input type="text" id="f-name" placeholder="e.g. Q3 Sales Dashboard Kit">
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="f-cat">
+            <option value="analysis">📊 Analysis & Dashboard</option>
+            <option value="ai-visuals">🎨 AI Prompt Visuals</option>
+            <option value="slides">🖥️ Slides Template</option>
+            <option value="posters">🖼️ Posters</option>
+            <option value="digital">📦 Digital Products</option>
+            <option value="games">🎮 Games</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Price (leave blank = Free)</label>
+          <input type="text" id="f-price" placeholder="e.g. $19 or Free">
+        </div>
+        <div class="form-group full">
+          <label>Description</label>
+          <textarea id="f-desc" placeholder="Brief description of this product..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Tags (comma-separated)</label>
+          <input type="text" id="f-tags" placeholder="figma, data, dark-mode">
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="f-status">
+            <option value="published">Published</option>
+            <option value="draft">Draft</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Cover Emoji</label>
+          <div class="emoji-picker" id="emoji-picker"></div>
+        </div>
+        <div class="form-group full">
+          <label>Product / Purchase URL</label>
+          <input type="text" id="f-url" placeholder="https://gumroad.com/l/...">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveProduct()">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCT DETAIL MODAL (public) -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Product Details</div>
+      <button class="modal-close" onclick="closeDetailModal()">×</button>
+    </div>
+    <div class="modal-body" id="detail-body"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DATA STORE ───────────────────────────────────────────
+const CATS = {
+  'analysis':   { label: 'Analysis & Dashboard', icon: '📊', bg: '#1a3a5c22', accent: '#1a3a5c' },
+  'ai-visuals': { label: 'AI Prompt Visuals',    icon: '🎨', bg: '#2d6a4f22', accent: '#2d6a4f' },
+  'slides':     { label: 'Slides Template',       icon: '🖥️', bg: '#c9a84c22', accent: '#c9a84c' },
+  'posters':    { label: 'Posters',               icon: '🖼️', bg: '#c44b2b22', accent: '#c44b2b' },
+  'digital':    { label: 'Digital Products',      icon: '📦', bg: '#5c3a8a22', accent: '#5c3a8a' },
+  'games':      { label: 'Games',                 icon: '🎮', bg: '#2a5c3a22', accent: '#2a5c3a' }
+};
+
+const EMOJIS = ['📊','📈','📉','🎨','🖼️','🖥️','🎮','📦','🎯','🚀','💡','🌟','✨','🔥','💎','🎁','🛠️','📱','🌈','🎵','📝','🗂️','⚡','🏆'];
+
+let products = JSON.parse(localStorage.getItem('folio_products') || 'null') || [
+  { id:1, name:'Revenue Analytics Dashboard', cat:'analysis', price:'$29', desc:'A complete dark-mode dashboard template with 12 chart widgets, KPI cards, and trend indicators. Built for Figma & Power BI.', tags:['figma','powerbi','dark-mode'], status:'published', emoji:'📊', url:'#', date:'2025-12-01' },
+  { id:2, name:'SaaS Metrics Tracker',        cat:'analysis', price:'$19', desc:'Track MRR, churn, and LTV in one clean spreadsheet template. Auto-calculates growth rates.', tags:['excel','saas','metrics'], status:'published', emoji:'📈', url:'#', date:'2025-12-10' },
+  { id:3, name:'Neon Portraits Pack',          cat:'ai-visuals', price:'$12', desc:'50 AI-generated portrait prompts with neon cyberpunk aesthetics. Works with Midjourney & DALL·E.', tags:['midjourney','cyberpunk','portraits'], status:'published', emoji:'🎨', url:'#', date:'2025-11-20' },
+  { id:4, name:'Dreamscape Landscape Prompts', cat:'ai-visuals', price:'Free', desc:'15 curated fantasy landscape prompts for any AI image generator. Free to download.', tags:['fantasy','landscapes','free'], status:'published', emoji:'🌈', url:'#', date:'2025-11-15' },
+  { id:5, name:'Pitch Deck Pro Template',      cat:'slides', price:'$24', desc:'A 30-slide pitch deck template in Notion, PowerPoint, and Google Slides. Minimal & investor-ready.', tags:['startup','pitch','minimal'], status:'published', emoji:'🖥️', url:'#', date:'2025-12-05' },
+  { id:6, name:'Creative Agency Deck',         cat:'slides', price:'$18', desc:'Vibrant, bold presentation template perfect for creative studios and agencies. 20 custom slides.', tags:['agency','bold','colorful'], status:'draft', emoji:'✨', url:'#', date:'2025-12-12' },
+  { id:7, name:'Botanical Series Prints',      cat:'posters', price:'$8', desc:'Set of 6 high-res botanical illustration posters. Print-ready A3 & US Letter PDF files.', tags:['botanical','print','illustration'], status:'published', emoji:'🖼️', url:'#', date:'2025-10-30' },
+  { id:8, name:'Retro Type Posters Vol.1',     cat:'posters', price:'$15', desc:'12 vintage-style typographic posters with motivational quotes. Instant digital download.', tags:['retro','typography','quotes'], status:'published', emoji:'🔥', url:'#', date:'2025-11-08' },
+  { id:9, name:'Notion Life OS Template',      cat:'digital', price:'$22', desc:'Complete Notion workspace setup — habits, goals, projects, journal. 1-click install.', tags:['notion','productivity','system'], status:'published', emoji:'📦', url:'#', date:'2025-12-01' },
+  { id:10, name:'Social Media Kit Bundle',     cat:'digital', price:'$35', desc:'300+ templates for Instagram, Twitter, and LinkedIn. Figma source files included.', tags:['social','figma','canva'], status:'published', emoji:'📱', url:'#', date:'2025-12-08' },
+  { id:11, name:'Word Puzzle Web Game',        cat:'games', price:'Free', desc:'A browser-based daily word puzzle game — open source and fully customizable. React + Tailwind.', tags:['react','word','open-source'], status:'published', emoji:'🎮', url:'#', date:'2025-11-25' },
+  { id:12, name:'Memory Card Game Engine',     cat:'games', price:'$16', desc:'A configurable memory card game built in vanilla JS. Drop in your own card images and go.', tags:['javascript','memory','casual'], status:'draft', emoji:'🃏', url:'#', date:'2025-12-03' },
+];
+let editingId = null;
+let currentManageCat = 'all';
+let settings = JSON.parse(localStorage.getItem('folio_settings') || '{}');
+
+function save() { localStorage.setItem('folio_products', JSON.stringify(products)); }
+
+// ─── VIEWS ────────────────────────────────────────────────
+function showView(v) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById(v + '-view').classList.add('active');
+  document.querySelectorAll('.nav-tab')[v === 'public' ? 0 : 1].classList.add('active');
+  if (v === 'public') renderPublicGrid('all');
+  if (v === 'cms') { renderDashboard(); renderManage('all'); renderSettings(); }
+}
+
+// ─── PUBLIC ───────────────────────────────────────────────
+function filterPublic(cat, btn) {
+  document.querySelectorAll('.hero-cat').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPublicGrid(cat);
+}
+
+function renderPublicGrid(cat) {
+  const pub = products.filter(p => p.status === 'published' && (cat === 'all' || p.cat === cat));
+  const grid = document.getElementById('public-product-grid');
+  document.getElementById('grid-label').textContent = cat === 'all' ? 'All Products' : CATS[cat]?.label || cat;
+  document.getElementById('grid-count').textContent = pub.length + ' item' + (pub.length !== 1 ? 's' : '');
+  if (!pub.length) {
+    grid.innerHTML = '<div class="no-items">No products in this category yet.</div>'; return;
+  }
+  grid.innerHTML = pub.map((p, i) => {
+    const c = CATS[p.cat];
+    return `
+    <div class="product-card" style="animation-delay:${i*0.04}s" onclick="openDetailModal(${p.id})">
+      <div class="card-thumb" style="background:${c.bg}">
+        <span>${p.emoji}</span>
+        <span class="card-thumb-label">${c.icon} ${c.label}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-cat">${c.label}</div>
+        <div class="card-title">${p.name}</div>
+        <div class="card-desc">${p.desc.slice(0,90)}${p.desc.length>90?'…':''}</div>
+        <div class="card-tags">${p.tags.slice(0,3).map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+        <div class="card-footer">
+          <span class="card-price ${p.price==='Free'?'free':''}">${p.price || 'Free'}</span>
+          <button class="card-btn" onclick="event.stopPropagation(); handleGetIt(${p.id})">
+            ${p.price === 'Free' ? 'Get Free' : 'Get It'}
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function handleGetIt(id) {
+  const p = products.find(x => x.id === id);
+  if (p?.url && p.url !== '#') window.open(p.url, '_blank');
+  else showToast('Link not configured yet!');
+}
+
+function openDetailModal(id) {
+  const p = products.find(x => x.id === id); if (!p) return;
+  const c = CATS[p.cat];
+  document.getElementById('detail-body').innerHTML = `
+    <div class="detail-thumb" style="background:${c.bg}">${p.emoji}</div>
+    <div class="detail-cat">${c.icon} ${c.label}</div>
+    <div class="detail-title">${p.name}</div>
+    <div class="card-tags" style="margin-bottom:.8rem">${p.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+    <div class="detail-desc">${p.desc}</div>
+    <div class="detail-footer">
+      <div class="detail-price ${p.price==='Free'?'free':''}">${p.price || 'Free'}</div>
+      <button class="card-btn" style="padding:.55rem 1.5rem; font-size:.72rem"
+        onclick="handleGetIt(${p.id})">${p.price === 'Free' ? '↓ Download Free' : '→ Get It Now'}</button>
+    </div>`;
+  document.getElementById('detail-modal').classList.add('open');
+}
+function closeDetailModal() { document.getElementById('detail-modal').classList.remove('open'); }
+
+// ─── CMS: DASHBOARD ───────────────────────────────────────
+function renderDashboard() {
+  const total = products.length;
+  const pub = products.filter(p => p.status === 'published').length;
+  const free = products.filter(p => !p.price || p.price === 'Free').length;
+  const cats = Object.keys(CATS).length;
+
+  document.getElementById('stat-grid').innerHTML = [
+    { val: total, label: 'Total Products', delta: '+2 this month', dir: 'up' },
+    { val: pub, label: 'Published', delta: (total-pub) + ' drafts', dir: 'up' },
+    { val: free, label: 'Free Items', delta: 'Building audience', dir: 'up' },
+    { val: cats, label: 'Categories', delta: 'All active', dir: 'up' },
+  ].map(s => `
+    <div class="stat-card">
+      <div class="stat-val">${s.val}</div>
+      <div class="stat-label">${s.label}</div>
+      <div class="stat-delta ${s.dir}">▲ ${s.delta}</div>
+    </div>`).join('');
+
+  // Bar chart
+  const maxCount = Math.max(...Object.keys(CATS).map(k => products.filter(p => p.cat === k).length), 1);
+  document.getElementById('bar-chart').innerHTML = Object.entries(CATS).map(([k, c]) => {
+    const cnt = products.filter(p => p.cat === k).length;
+    const h = Math.round((cnt / maxCount) * 80);
+    return `<div class="bar-wrap">
+      <div class="bar" style="height:${h}px; background:${c.accent}44; border:1.5px solid ${c.accent}"></div>
+      <div class="bar-lbl">${c.icon}</div>
+    </div>`;
+  }).join('');
+
+  // Donut
+  renderDonut();
+
+  // Recent table
+  document.getElementById('recent-tbody').innerHTML = [...products].slice(0, 6).map(p => tblRow(p)).join('');
+}
+
+function renderDonut() {
+  const pub2 = products.filter(p => p.status === 'published').length;
+  const draft = products.filter(p => p.status === 'draft').length;
+  const total = products.length || 1;
+  const pubDeg = (pub2 / total) * 283;
+  const svg = document.getElementById('donut-svg');
+  svg.innerHTML = `
+    <circle cx="18" cy="18" r="15.9" fill="none" stroke="#eee" stroke-width="3.5"/>
+    <circle cx="18" cy="18" r="15.9" fill="none" stroke="#c9a84c" stroke-width="3.5"
+      stroke-dasharray="${pubDeg} ${283-pubDeg}" stroke-dashoffset="70.75" transform="rotate(-90 18 18)"/>`;
+  document.getElementById('donut-legend').innerHTML = `
+    <div class="legend-item"><div class="legend-dot" style="background:#c9a84c"></div> Published (${pub2})</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#eee"></div> Draft (${draft})</div>`;
+}
+
+function tblRow(p) {
+  const c = CATS[p.cat];
+  return `<tr>
+    <td><span class="tbl-title">${p.emoji} ${p.name}</span></td>
+    <td><span class="tbl-cat">${c.icon} ${c.label}</span></td>
+    <td>${p.price || 'Free'}</td>
+    <td><span class="tbl-status ${p.status}">${p.status}</span></td>
+    <td>${p.date || '—'}</td>
+    <td><div class="tbl-actions">
+      <button class="tbl-btn" onclick="openEditModal(${p.id})">Edit</button>
+      <button class="tbl-btn" onclick="toggleStatus(${p.id})">${p.status==='published'?'Unpublish':'Publish'}</button>
+      <button class="tbl-btn danger" onclick="deleteProduct(${p.id})">Del</button>
+    </div></td>
+  </tr>`;
+}
+
+// ─── CMS: MANAGE ─────────────────────────────────────────
+function showCmsPage(page, btn, cat) {
+  document.querySelectorAll('.cms-nav-item').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.cms-page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  if (page === 'manage') { currentManageCat = cat || 'all'; renderManage(currentManageCat); }
+  if (page === 'dashboard') renderDashboard();
+  if (page === 'settings') renderSettings();
+}
+
+function renderManage(cat) {
+  const list = cat === 'all' ? products : products.filter(p => p.cat === cat);
+  const label = cat === 'all' ? 'All Products' : CATS[cat]?.label;
+  document.getElementById('manage-title').textContent = label;
+  document.getElementById('manage-tbody').innerHTML = list.length
+    ? list.map(p => `<tr>
+        <td style="font-size:1.2rem">${p.emoji}</td>
+        <td><span class="tbl-title">${p.name}</span></td>
+        <td><span class="tbl-cat">${CATS[p.cat].icon} ${CATS[p.cat].label}</span></td>
+        <td>${p.price || 'Free'}</td>
+        <td><span class="tbl-status ${p.status}">${p.status}</span></td>
+        <td>${p.tags.map(t=>`<span class="tag">${t}</span>`).join(' ')}</td>
+        <td><div class="tbl-actions">
+          <button class="tbl-btn" onclick="openEditModal(${p.id})">Edit</button>
+          <button class="tbl-btn" onclick="toggleStatus(${p.id})">${p.status==='published'?'Unpublish':'Publish'}</button>
+          <button class="tbl-btn danger" onclick="deleteProduct(${p.id})">Delete</button>
+        </div></td>
+      </tr>`).join('')
+    : `<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--mist);font-size:.75rem">No products in this category.</td></tr>`;
+}
+
+// ─── MODAL ────────────────────────────────────────────────
+function openAddModal() {
+  editingId = null;
+  document.getElementById('modal-title').textContent = 'Add Product';
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-desc').value = '';
+  document.getElementById('f-price').value = '';
+  document.getElementById('f-tags').value = '';
+  document.getElementById('f-url').value = '';
+  document.getElementById('f-cat').value = 'analysis';
+  document.getElementById('f-status').value = 'published';
+  renderEmojiPicker('📊');
+  document.getElementById('product-modal').classList.add('open');
+}
+
+function openEditModal(id) {
+  const p = products.find(x => x.id === id); if (!p) return;
+  editingId = id;
+  document.getElementById('modal-title').textContent = 'Edit Product';
+  document.getElementById('f-name').value = p.name;
+  document.getElementById('f-desc').value = p.desc;
+  document.getElementById('f-price').value = p.price;
+  document.getElementById('f-tags').value = p.tags.join(', ');
+  document.getElementById('f-url').value = p.url || '';
+  document.getElementById('f-cat').value = p.cat;
+  document.getElementById('f-status').value = p.status;
+  renderEmojiPicker(p.emoji);
+  document.getElementById('product-modal').classList.add('open');
+}
+
+function renderEmojiPicker(sel) {
+  document.getElementById('emoji-picker').innerHTML = EMOJIS.map(e =>
+    `<span class="emoji-opt ${e===sel?'selected':''}" onclick="selectEmoji('${e}', this)">${e}</span>`
+  ).join('');
+}
+
+function selectEmoji(e, el) {
+  document.querySelectorAll('.emoji-opt').forEach(x => x.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function getSelectedEmoji() {
+  const sel = document.querySelector('.emoji-opt.selected');
+  return sel ? sel.textContent : '📦';
+}
+
+function closeModal() { document.getElementById('product-modal').classList.remove('open'); }
+
+function saveProduct() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { showToast('Please enter a product name'); return; }
+  const p = {
+    id: editingId || Date.now(),
+    name,
+    cat: document.getElementById('f-cat').value,
+    price: document.getElementById('f-price').value.trim() || 'Free',
+    desc: document.getElementById('f-desc').value.trim() || 'No description.',
+    tags: document.getElementById('f-tags').value.split(',').map(t=>t.trim()).filter(Boolean),
+    status: document.getElementById('f-status').value,
+    emoji: getSelectedEmoji(),
+    url: document.getElementById('f-url').value.trim() || '#',
+    date: new Date().toISOString().split('T')[0]
+  };
+  if (editingId) {
+    const idx = products.findIndex(x => x.id === editingId);
+    products[idx] = p;
+    showToast('Product updated ✓');
+  } else {
+    products.unshift(p);
+    showToast('Product added ✓');
+  }
+  save(); closeModal(); renderDashboard(); renderManage(currentManageCat);
+}
+
+function deleteProduct(id) {
+  if (!confirm('Delete this product?')) return;
+  products = products.filter(p => p.id !== id);
+  save(); renderDashboard(); renderManage(currentManageCat); showToast('Product deleted');
+}
+
+function toggleStatus(id) {
+  const p = products.find(x => x.id === id); if (!p) return;
+  p.status = p.status === 'published' ? 'draft' : 'published';
+  save(); renderDashboard(); renderManage(currentManageCat);
+  showToast(`Set to ${p.status} ✓`);
+}
+
+// ─── SETTINGS ─────────────────────────────────────────────
+function renderSettings() {
+  document.getElementById('cat-toggles').innerHTML = Object.entries(CATS).map(([k, c]) => `
+    <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.75rem">
+      <input type="checkbox" checked style="accent-color:var(--gold);width:14px;height:14px">
+      ${c.icon} ${c.label}
+    </label>`).join('');
+}
+
+function saveSettings() { showToast('Settings saved ✓'); }
+
+// ─── TOAST ────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ─── INIT ────────────────────────────────────────────────
+renderPublicGrid('all');
+</script>
+</body>
+</html>
